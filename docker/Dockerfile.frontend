@@ -1,0 +1,48 @@
+# GenSpark AI - Frontend Dockerfile (Next.js)
+# Multi-stage build for optimized production image
+
+FROM node:18-alpine AS base
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Build stage
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ .
+COPY shared/ ../shared/
+RUN npm run build
+
+# Runtime stage
+FROM node:18-alpine AS runtime
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# Copy built application
+COPY --from=base /app/node_modules ./node_modules
+COPY --from=build /app/.next ./.next
+COPY --from=build /app/public ./public
+COPY --from=build /app/package.json ./package.json
+
+# Set proper permissions
+RUN chown -R nextjs:nodejs /app
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Start the application
+CMD ["npm", "start"]

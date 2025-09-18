@@ -1,0 +1,40 @@
+# GenSpark AI - Backend Dockerfile (Node.js/Express)
+# Optimized for Cloud Run deployment
+
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S express -u 1001
+
+# Copy package files
+COPY backend/package*.json ./
+COPY shared/package*.json ../shared/
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy application code
+COPY backend/ .
+COPY shared/ ../shared/
+
+# Set proper permissions
+RUN chown -R express:nodejs /app
+USER express
+
+# Expose port
+EXPOSE 8080
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Start the application
+CMD ["node", "server.js"]
