@@ -1,0 +1,105 @@
+# GenSpark AI - CI/CD Environment Variables Template
+# Copy these to your .env file and fill in actual values from CI/CD setup
+
+# Cloud Build Configuration
+CLOUD_BUILD_PROJECT_ID=genspark-ai-prod
+CLOUD_BUILD_REGION=us-central1
+CLOUD_BUILD_SERVICE_ACCOUNT=genspark-app-sa@genspark-ai-prod.iam.gserviceaccount.com
+BUILD_TIMEOUT=2400
+
+# Container Registry
+CONTAINER_REGISTRY=gcr.io/genspark-ai-prod
+IMAGE_TAG_STRATEGY=build_id
+CONTAINER_SCANNING_ENABLED=true
+
+# GitHub Integration
+GITHUB_OWNER=your-github-username
+GITHUB_REPO=genspark-ai
+GITHUB_BRANCH=main
+WEBHOOK_SECRET=your-github-webhook-secret
+
+# Deployment Configuration
+FRONTEND_SERVICE_NAME=genspark-frontend
+BACKEND_SERVICE_NAME=genspark-api
+DEPLOYMENT_REGION=us-central1
+DEPLOYMENT_PLATFORM=managed
+
+# Cloud Run Configuration
+FRONTEND_MEMORY=1Gi
+FRONTEND_CPU=1
+FRONTEND_MIN_INSTANCES=0
+FRONTEND_MAX_INSTANCES=10
+FRONTEND_PORT=3000
+
+BACKEND_MEMORY=2Gi
+BACKEND_CPU=2
+BACKEND_MIN_INSTANCES=1
+BACKEND_MAX_INSTANCES=20
+BACKEND_PORT=8080
+
+# VPC Configuration
+VPC_CONNECTOR=genspark-connector
+VPC_EGRESS=private-ranges-only
+VPC_CONNECTOR_PROJECT=genspark-ai-prod
+
+# Build Notifications
+NOTIFICATION_TOPIC=cloud-builds
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
+EMAIL_NOTIFICATIONS=admin@yourdomain.com
+BUILD_FAILURE_ALERTS=true
+
+# Environment-specific URLs
+PRODUCTION_FRONTEND_URL=https://app.yourdomain.com
+PRODUCTION_BACKEND_URL=https://api.yourdomain.com
+STAGING_FRONTEND_URL=https://genspark-frontend-staging-uc.a.run.app
+STAGING_BACKEND_URL=https://genspark-api-staging-uc.a.run.app
+
+# Deployment Strategy
+DEPLOYMENT_STRATEGY=rolling
+HEALTH_CHECK_ENABLED=true
+HEALTH_CHECK_PATH=/health
+HEALTH_CHECK_TIMEOUT=30
+ROLLBACK_ON_FAILURE=true
+
+# Build Artifacts
+BUILD_LOGS_BUCKET=gs://genspark-ai-prod-backups/build-logs
+BUILD_ARTIFACTS_BUCKET=gs://genspark-ai-prod-backups/build-artifacts
+ARTIFACT_RETENTION_DAYS=30
+
+# Security and Secrets
+SECRET_MANAGER_ENABLED=true
+SECRETS_MOUNT_PATH=/secrets
+RUNTIME_SECRET_ACCESS=true
+BUILD_SECRET_ACCESS=true
+
+# Performance and Scaling
+CONCURRENT_BUILDS=5
+PARALLEL_DEPLOYMENT=true
+BUILD_MACHINE_TYPE=E2_HIGHCPU_8
+BUILD_DISK_SIZE=100GB
+
+# Testing and Validation
+POST_DEPLOYMENT_TESTS=true
+INTEGRATION_TESTS=true
+SMOKE_TESTS=true
+PERFORMANCE_TESTS=false
+LOAD_TESTING=false
+
+# Monitoring Integration
+BUILD_METRICS_ENABLED=true
+DEPLOYMENT_METRICS_ENABLED=true
+PERFORMANCE_MONITORING=true
+ERROR_TRACKING=true
+
+# Rollback Configuration
+AUTOMATIC_ROLLBACK=false
+ROLLBACK_TIMEOUT=300
+CANARY_DEPLOYMENT=false
+BLUE_GREEN_DEPLOYMENT=false
+
+# Development vs Production
+BUILD_ENVIRONMENT=production
+DEBUG_BUILD=false
+VERBOSE_LOGGING=false
+BUILD_OPTIMIZATION=true
+MINIFICATION_ENABLED=true
