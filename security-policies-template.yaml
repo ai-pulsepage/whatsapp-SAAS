@@ -1,0 +1,279 @@
+# GenSpark AI - Security Policies Template
+# IAM roles and security configurations
+
+# Custom IAM Role Definition
+apiVersion: iam.gcp.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  name: genspark-app-role
+spec:
+  forProvider:
+    title: "GenSpark Application Role"
+    description: "Custom role for GenSpark AI application with minimal required permissions"
+    stage: "GA"
+    includedPermissions:
+      # Cloud SQL permissions
+      - cloudsql.instances.connect
+      - cloudsql.instances.get
+      # Secret Manager permissions
+      - secretmanager.versions.access
+      - secretmanager.versions.get
+      # Cloud Storage permissions
+      - storage.objects.create
+      - storage.objects.delete
+      - storage.objects.get
+      - storage.objects.list
+      - storage.buckets.get
+      # Redis permissions
+      - redis.instances.get
+      - redis.instances.list
+      # Logging permissions
+      - logging.logEntries.create
+      # Monitoring permissions
+      - monitoring.metricDescriptors.create
+      - monitoring.metricDescriptors.get
+      - monitoring.metricDescriptors.list
+      - monitoring.monitoredResourceDescriptors.get
+      - monitoring.monitoredResourceDescriptors.list
+      - monitoring.timeSeries.create
+      # Error Reporting permissions
+      - errorreporting.errorEvents.create
+      - errorreporting.errorEvents.list
+
+---
+# Security Policy for Cloud Armor
+apiVersion: compute.gcp.crossplane.io/v1beta1
+kind: SecurityPolicy
+metadata:
+  name: genspark-security-policy
+spec:
+  forProvider:
+    description: "GenSpark AI security policy with DDoS protection and rate limiting"
+    rules:
+      - priority: 1000
+        match:
+          expr: "true"
+        action: "allow"
+        description: "Default allow rule"
+      - priority: 2000
+        match:
+          expr: "rate_based_ban.exceed_rate_limit_threshold"
+        action: "deny-429"
+        description: "Rate limiting protection"
+        rateLimitOptions:
+          rateLimitThreshold:
+            count: 100
+            intervalSec: 60
+          banThreshold:
+            count: 1000
+            intervalSec: 600
+          banDurationSec: 300
+      - priority: 3000
+        match:
+          expr: "origin.ip == '127.0.0.1'"
+        action: "deny-403"
+        description: "Block localhost requests"
+      - priority: 4000
+        match:
+          expr: "request.headers['user-agent'].contains('bot')"
+        action: "deny-403"
+        description: "Block bot requests"
+
+---
+# VPC Network Configuration
+apiVersion: compute.gcp.crossplane.io/v1beta1
+kind: Network
+metadata:
+  name: genspark-vpc
+spec:
+  forProvider:
+    description: "GenSpark AI production VPC network"
+    autoCreateSubnetworks: false
+    routingConfig:
+      routingMode: "GLOBAL"
+
+---
+# Subnet Configuration
+apiVersion: compute.gcp.crossplane.io/v1beta1
+kind: Subnetwork
+metadata:
+  name: genspark-subnet
+spec:
+  forProvider:
+    description: "GenSpark AI production subnet"
+    ipCidrRange: "10.1.0.0/24"
+    network: "genspark-vpc"
+    region: "us-central1"
+    enableFlowLogs: true
+    logConfig:
+      aggregationInterval: "INTERVAL_5_SEC"
+      flowSampling: 0.1
+      metadata: "INCLUDE_ALL_METADATA"
+
+---
+# Firewall Rules
+apiVersion: compute.gcp.crossplane.io/v1beta1
+kind: Firewall
+metadata:
+  name: allow-internal
+spec:
+  forProvider:
+    description: "Allow internal VPC communication"
+    network: "genspark-vpc"
+    direction: "INGRESS"
+    priority: 1000
+    sourceRanges:
+      - "10.1.0.0/24"
+    allowed:
+      - protocol: "tcp"
+      - protocol: "udp"
+      - protocol: "icmp"
+
+---
+apiVersion: compute.gcp.crossplane.io/v1beta1
+kind: Firewall
+metadata:
+  name: allow-http-https
+spec:
+  forProvider:
+    description: "Allow HTTP and HTTPS traffic"
+    network: "genspark-vpc"
+    direction: "INGRESS"
+    priority: 1000
+    sourceRanges:
+      - "0.0.0.0/0"
+    targetTags:
+      - "http-server"
+      - "https-server"
+    allowed:
+      - protocol: "tcp"
+        ports:
+          - "80"
+          - "443"
+
+---
+apiVersion: compute.gcp.crossplane.io/v1beta1
+kind: Firewall
+metadata:
+  name: allow-ssh-admin
+spec:
+  forProvider:
+    description: "Allow SSH from Google Cloud Console"
+    network: "genspark-vpc"
+    direction: "INGRESS"
+    priority: 1000
+    sourceRanges:
+      - "35.235.240.0/20"  # Google Cloud Console IP range
+    targetTags:
+      - "ssh-admin"
+    allowed:
+      - protocol: "tcp"
+        ports:
+          - "22"
+
+---
+apiVersion: compute.gcp.crossplane.io/v1beta1
+kind: Firewall
+metadata:
+  name: deny-all
+spec:
+  forProvider:
+    description: "Deny all other traffic"
+    network: "genspark-vpc"
+    direction: "INGRESS"
+    priority: 65534
+    sourceRanges:
+      - "0.0.0.0/0"
+    denied:
+      - protocol: "all"
+
+---
+# SSL Certificate
+apiVersion: compute.gcp.crossplane.io/v1beta1
+kind: ManagedSSLCertificate
+metadata:
+  name: genspark-ssl
+spec:
+  forProvider:
+    description: "GenSpark AI production SSL certificate"
+    managed:
+      domains:
+        - "app.yourdomain.com"
+        - "api.yourdomain.com"
+        - "admin.yourdomain.com"
+
+---
+# Monitoring Alert Policies
+apiVersion: monitoring.gcp.crossplane.io/v1alpha1
+kind: AlertPolicy
+metadata:
+  name: high-error-rate
+spec:
+  forProvider:
+    displayName: "High Error Rate Alert"
+    documentation:
+      content: "This alert fires when the error rate is above 5% for 2 minutes"
+      mimeType: "text/markdown"
+    conditions:
+      - displayName: "Error rate condition"
+        conditionThreshold:
+          filter: 'resource.type="cloud_run_revision"'
+          comparison: "COMPARISON_GREATER_THAN"
+          thresholdValue: 0.05
+          duration: "120s"
+          aggregations:
+            - alignmentPeriod: "60s"
+              perSeriesAligner: "ALIGN_RATE"
+              crossSeriesReducer: "REDUCE_MEAN"
+    enabled: true
+    combiner: "OR"
+
+---
+apiVersion: monitoring.gcp.crossplane.io/v1alpha1
+kind: AlertPolicy
+metadata:
+  name: high-latency
+spec:
+  forProvider:
+    displayName: "High Latency Alert"
+    documentation:
+      content: "This alert fires when response latency is above 2 seconds"
+      mimeType: "text/markdown"
+    conditions:
+      - displayName: "Latency condition"
+        conditionThreshold:
+          filter: 'resource.type="cloud_run_revision"'
+          comparison: "COMPARISON_GREATER_THAN"
+          thresholdValue: 2000
+          duration: "300s"
+          aggregations:
+            - alignmentPeriod: "60s"
+              perSeriesAligner: "ALIGN_MEAN"
+              crossSeriesReducer: "REDUCE_MEAN"
+    enabled: true
+    combiner: "OR"
+
+---
+apiVersion: monitoring.gcp.crossplane.io/v1alpha1
+kind: AlertPolicy
+metadata:
+  name: database-connection-failure
+spec:
+  forProvider:
+    displayName: "Database Connection Failure"
+    documentation:
+      content: "This alert fires when database connections fail"
+      mimeType: "text/markdown"
+    conditions:
+      - displayName: "Database connection condition"
+        conditionThreshold:
+          filter: 'resource.type="cloudsql_database"'
+          comparison: "COMPARISON_GREATER_THAN"
+          thresholdValue: 0
+          duration: "60s"
+          aggregations:
+            - alignmentPeriod: "60s"
+              perSeriesAligner: "ALIGN_RATE"
+              crossSeriesReducer: "REDUCE_SUM"
+    enabled: true
+    combiner: "OR"

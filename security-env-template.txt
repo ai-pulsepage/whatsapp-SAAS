@@ -1,0 +1,113 @@
+# GenSpark AI - Security Environment Variables Template
+# Copy these to your .env file and fill in actual values from security setup
+
+# VPC Network Configuration
+VPC_NETWORK=genspark-vpc
+VPC_SUBNET=genspark-subnet
+VPC_REGION=us-central1
+SUBNET_CIDR=10.1.0.0/24
+
+# SSL Certificate Configuration
+SSL_CERTIFICATE_NAME=genspark-ssl
+SSL_DOMAINS=app.yourdomain.com,api.yourdomain.com,admin.yourdomain.com
+SSL_MANAGED=true
+
+# Cloud Armor Security Policy
+SECURITY_POLICY_NAME=genspark-security-policy
+RATE_LIMIT_THRESHOLD=100
+RATE_LIMIT_INTERVAL=60
+BAN_THRESHOLD=1000
+BAN_DURATION=300
+
+# IAM and Service Account Security
+CUSTOM_ROLE_NAME=GenSparkAppRole
+SERVICE_ACCOUNT_EMAIL=genspark-app-sa@genspark-ai-prod.iam.gserviceaccount.com
+IAM_CONDITIONS_ENABLED=true
+PRINCIPAL_ACCESS_BOUNDARY_ENABLED=true
+
+# Firewall Configuration
+ALLOW_INTERNAL_TRAFFIC=true
+ALLOW_HTTP_HTTPS=true
+ALLOW_SSH_ADMIN=true
+DEFAULT_DENY_ALL=true
+FIREWALL_PRIORITY_HIGH=1000
+FIREWALL_PRIORITY_LOW=65534
+
+# Network Security Monitoring
+VPC_FLOW_LOGS_ENABLED=true
+FLOW_LOGS_SAMPLING=0.1
+FLOW_LOGS_AGGREGATION=INTERVAL_5_SEC
+FLOW_LOGS_METADATA=INCLUDE_ALL_METADATA
+
+# Audit Logging Configuration
+AUDIT_LOGS_ENABLED=true
+AUDIT_LOG_RETENTION=365
+AUDIT_LOG_SINK=genspark-audit-logs
+AUDIT_LOG_FILTER=protoPayload.serviceName=("cloudsql.googleapis.com" OR "secretmanager.googleapis.com")
+
+# Security Monitoring and Alerting
+SECURITY_ALERTS_ENABLED=true
+ALERT_NOTIFICATION_EMAIL=admin@yourdomain.com
+ERROR_RATE_THRESHOLD=0.05
+LATENCY_THRESHOLD=2000
+DATABASE_ERROR_THRESHOLD=0
+
+# DDoS Protection
+DDOS_PROTECTION_ENABLED=true
+CLOUD_ARMOR_ENABLED=true
+RATE_LIMITING_ENABLED=true
+IP_REPUTATION_ENABLED=true
+
+# Access Control
+CORS_ENABLED=true
+CORS_ORIGINS=https://app.yourdomain.com,https://admin.yourdomain.com
+CORS_MAX_AGE=3600
+CORS_CREDENTIALS=true
+
+# Security Headers
+SECURITY_HEADERS_ENABLED=true
+HSTS_MAX_AGE=31536000
+CONTENT_TYPE_NOSNIFF=true
+FRAME_OPTIONS=DENY
+XSS_PROTECTION=true
+
+# API Security
+API_KEY_REQUIRED=true
+JWT_TOKEN_REQUIRED=true
+RATE_LIMIT_PER_IP=1000
+RATE_LIMIT_WINDOW=3600
+API_VERSION_REQUIRED=true
+
+# Data Encryption
+ENCRYPTION_AT_REST=true
+ENCRYPTION_IN_TRANSIT=true
+DATABASE_SSL_MODE=require
+STORAGE_ENCRYPTION=true
+SECRET_ENCRYPTION=true
+
+# Compliance and Privacy
+GDPR_COMPLIANCE=true
+DATA_RETENTION_POLICY=true
+PRIVACY_CONTROLS_ENABLED=true
+COOKIE_CONSENT_REQUIRED=true
+DATA_ANONYMIZATION=true
+
+# Security Scanning
+VULNERABILITY_SCANNING=true
+CONTAINER_SCANNING=true
+DEPENDENCY_SCANNING=true
+CODE_SCANNING=true
+SECURITY_BASELINE_ENABLED=true
+
+# Backup Security
+BACKUP_ENCRYPTION=true
+BACKUP_ACCESS_CONTROL=true
+BACKUP_RETENTION_ENCRYPTED=true
+BACKUP_TRANSFER_ENCRYPTION=true
+
+# Development vs Production Settings
+SECURITY_LEVEL=production
+DEBUG_MODE=false
+VERBOSE_LOGGING=false
+DEVELOPMENT_CORS=false
+INSECURE_CONNECTIONS=false
