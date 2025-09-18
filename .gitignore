@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build
+
+# dotenv environment variables file
+.env
+.env.local
+.env.production
+.dev.vars
+
+# PM2
+.pm2/
+pids/
+logs/
+*.log
+
+# Backup files
+*.backup
+*.bak
+*.tar.gz
+*.zip
+
+# Google Cloud credentials and keys
+*.json
+genspark-service-account.json
+credentials.txt
+genspark-credentials.txt
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-admin-key.json
+
+# Wrangler
+.wrangler/
+wrangler.toml.bak
